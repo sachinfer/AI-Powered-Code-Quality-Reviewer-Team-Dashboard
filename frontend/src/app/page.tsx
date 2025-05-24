@@ -12,7 +12,7 @@ export default function Home() {
 
   useEffect(() => {
     if (status === "unauthenticated") {
-      router.push("/api/auth/signin");
+      router.push("/login");
     } else if (status === "authenticated" && session.user?.email) {
       fetch(`http://localhost:8000/users/by-email/${session.user.email}`)
         .then(res => {
