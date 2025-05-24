@@ -2,6 +2,7 @@
 from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey
 from sqlalchemy.orm import declarative_base, relationship
 from datetime import datetime
+from pydantic import BaseModel
 
 Base = declarative_base()
 
@@ -33,4 +34,7 @@ class CodeReview(Base):
     black = Column(Text)
     ai_feedback = Column(Text)
     created_at = Column(DateTime, default=datetime.utcnow)
-    user = relationship("User", back_populates="reviews") 
+    user = relationship("User", back_populates="reviews")
+
+class TeamCreate(BaseModel):
+    name: str 

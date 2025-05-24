@@ -83,16 +83,16 @@ export default function TeamDashboard() {
       <div className="mb-4">
         <label className="font-semibold mr-2">Select Team:</label>
         <select
-          className="border rounded p-2"
+          className="border rounded p-2 text-white bg-gray-800"
           onChange={(e) => {
             const team = teams.find((t) => t.id === Number(e.target.value));
             if (team) selectTeam(team);
           }}
           value={selectedTeam?.id || ""}
         >
-          <option value="">-- Select a team --</option>
+          <option value="" className="text-gray-800 bg-white">-- Select a team --</option>
           {teams.map((team) => (
-            <option key={team.id} value={team.id}>
+            <option key={team.id} value={team.id} className="text-white bg-gray-800">
               {team.name}
             </option>
           ))}
@@ -105,7 +105,7 @@ export default function TeamDashboard() {
             value={newTeamName}
             onChange={(e) => setNewTeamName(e.target.value)}
             placeholder="New team name"
-            className="border rounded p-2 mr-2"
+            className="border rounded p-2 mr-2 text-white bg-gray-800 placeholder-gray-400"
           />
           <button type="submit" className="bg-blue-600 text-white px-3 py-1 rounded">Create Team</button>
         </form>

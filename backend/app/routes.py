@@ -1,12 +1,13 @@
 from fastapi import APIRouter, UploadFile, File, Depends, HTTPException
 from app.services.linting import analyze_code
 from app.services.ai_review import ai_code_review
-from app.models import User, CodeReview, Team
-from app.main import AsyncSessionLocal
+from app.models import User, CodeReview, Team, Base, TeamCreate
+from app.db import AsyncSessionLocal
 from sqlalchemy.future import select
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
+from sqlalchemy import insert
 
 router = APIRouter()
 
@@ -73,12 +74,12 @@ async def get_reviews(user_id: int, db: AsyncSession = Depends(get_db)):
     ]
 
 @router.post("/teams/")
-async def create_team(name: str, db: AsyncSession = Depends(get_db)):
-    team = Team(name=name)
-    db.add(team)
+async def create_team(team: TeamCreate, db: AsyncSession = Depends(get_db)):
+    team_obj = Team(name=team.name)
+    db.add(team_obj)
     await db.commit()
-    await db.refresh(team)
-    return team
+    await db.refresh(team_obj)
+    return team_obj
 
 @router.get("/teams/{team_id}")
 async def get_team(team_id: int, db: AsyncSession = Depends(get_db)):
@@ -122,4 +123,25 @@ async def get_team_reviews(team_id: int, db: AsyncSession = Depends(get_db)):
             "created_at": r.created_at,
         }
         for r in reviews
-    ] 
+    ]
+
+@router.post("/demo/populate/")
+async def populate_demo_data(db: AsyncSession = Depends(get_db)):
+    # Create teams
+    team1 = Team(name="Backend Team")
+    team2 = Team(name="Frontend Team")
+    db.add_all([team1, team2])
+    await db.flush()
+    # Create users
+    user1 = User(github_id="1001", name="Alice", email="alice@example.com", avatar_url="https://randomuser.me/api/portraits/women/1.jpg", team=team1)
+    user2 = User(github_id="1002", name="Bob", email="bob@example.com", avatar_url="https://randomuser.me/api/portraits/men/2.jpg", team=team1)
+    user3 = User(github_id="1003", name="Carol", email="carol@example.com", avatar_url="https://randomuser.me/api/portraits/women/3.jpg", team=team2)
+    db.add_all([user1, user2, user3])
+    await db.flush()
+    # Create code reviews
+    review1 = CodeReview(user=user1, code="print('Hello')", language="python", pylint="Your code has been rated at 8.50/10", bandit="No issues identified.", black="would not reformat", ai_feedback="Looks good!")
+    review2 = CodeReview(user=user2, code="x = 1\ny = 2\nprint(x + y)", language="python", pylint="Your code has been rated at 7.00/10", bandit="No issues identified.", black="would reformat", ai_feedback="Consider using f-strings.")
+    review3 = CodeReview(user=user3, code="console.log('Hi')", language="javascript", pylint="N/A", bandit="N/A", black="N/A", ai_feedback="Use let/const instead of var.")
+    db.add_all([review1, review2, review3])
+    await db.commit()
+    return {"status": "Demo data populated"} 
