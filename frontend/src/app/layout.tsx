@@ -3,8 +3,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ReactNode } from "react";
 import ClientSessionProvider from "../components/ClientSessionProvider";
-import NavBar from "../components/NavBar";
-import AuthRedirect from "../components/AuthRedirect";
+// import MaybeNavBar from "../components/MaybeNavBar";
+// import AuthRedirect from "../components/AuthRedirect";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,8 +32,8 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <ClientSessionProvider>
-          <NavBar />
-          <AuthRedirect />
+          {/* <MaybeNavBar /> */}
+          {/* <AuthRedirect /> */}
           {children}
         </ClientSessionProvider>
       </body>

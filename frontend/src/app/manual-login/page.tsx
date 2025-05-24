@@ -20,7 +20,10 @@ export default function ManualLogin() {
     });
     setLoading(false);
     if (res.ok) {
-      router.push("/");
+      if (typeof window !== "undefined") {
+        localStorage.setItem("manual_auth", "true");
+        window.location.href = "/";
+      }
     } else {
       const data = await res.json();
       if (res.status === 401 && (data.detail === "Invalid credentials" || data.detail === "User not found")) {

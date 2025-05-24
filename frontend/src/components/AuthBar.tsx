@@ -22,6 +22,20 @@ export default function AuthBar() {
   }
 
   if (!session) {
+    // Manual auth logout button
+    if (typeof window !== "undefined" && localStorage.getItem("manual_auth") === "true") {
+      return (
+        <button
+          onClick={() => {
+            localStorage.removeItem("manual_auth");
+            window.location.href = "/login";
+          }}
+          className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 font-semibold"
+        >
+          Logout
+        </button>
+      );
+    }
     return (
       <div className="flex gap-2">
         <button
