@@ -129,14 +129,19 @@ export default function TeamDashboard() {
           </div>
           <h2 className="text-xl font-bold mb-2">Members</h2>
           <ul className="mb-4">
-            {members.map((m) => (
-              <li key={m.id} className="flex items-center gap-2 mb-1">
-                {m.avatar_url && (
-                  <img src={m.avatar_url} alt="avatar" className="w-6 h-6 rounded-full border" />
-                )}
-                <span>{m.name || m.email}</span>
-              </li>
-            ))}
+            {members.map((m) => {
+              // Count reviews for this member
+              const reviewCount = reviews.filter((r) => r.user_id === m.id).length;
+              return (
+                <li key={m.id} className="flex items-center gap-2 mb-1">
+                  {m.avatar_url && (
+                    <img src={m.avatar_url} alt="avatar" className="w-6 h-6 rounded-full border" />
+                  )}
+                  <span>{m.name || m.email}</span>
+                  <span className="ml-2 text-xs text-gray-400">({reviewCount} reviews)</span>
+                </li>
+              );
+            })}
           </ul>
           <h2 className="text-xl font-bold mb-2">Team Code Reviews</h2>
           <table className="w-full border text-sm">

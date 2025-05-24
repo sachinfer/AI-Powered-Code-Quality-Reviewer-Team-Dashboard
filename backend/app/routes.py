@@ -32,8 +32,8 @@ async def ai_review_code(file: UploadFile = File(...), language: str = "python")
     return {"ai_feedback": ai_feedback}
 
 @router.post("/users/")
-async def create_user(github_id: str, name: str, email: str, avatar_url: str, db: AsyncSession = Depends(get_db)):
-    user = User(github_id=github_id, name=name, email=email, avatar_url=avatar_url)
+async def create_user(github_id: str, name: str, email: str, avatar_url: str, team_id: int = None, db: AsyncSession = Depends(get_db)):
+    user = User(github_id=github_id, name=name, email=email, avatar_url=avatar_url, team_id=team_id)
     db.add(user)
     await db.commit()
     await db.refresh(user)
@@ -42,6 +42,14 @@ async def create_user(github_id: str, name: str, email: str, avatar_url: str, db
 @router.get("/users/{user_id}")
 async def get_user(user_id: int, db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(User).where(User.id == user_id))
+    user = result.scalar_one_or_none()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return user
+
+@router.get("/users/by-email/{email}")
+async def get_user_by_email(email: str, db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(User).where(User.email == email))
     user = result.scalar_one_or_none()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
