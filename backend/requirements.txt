@@ -3,4 +3,7 @@ uvicorn
 pylint
 python-multipart
 bandit
-black 
+black
+openai
+sqlalchemy
+aiomysql 
