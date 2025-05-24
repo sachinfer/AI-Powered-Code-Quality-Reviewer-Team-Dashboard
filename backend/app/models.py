@@ -16,6 +16,7 @@ class User(Base):
     reviews = relationship("CodeReview", back_populates="user")
     team_id = Column(Integer, ForeignKey("teams.id"), nullable=True)
     team = relationship("Team", back_populates="members")
+    hashed_password = Column(String(128), nullable=True)
 
 class Team(Base):
     __tablename__ = "teams"

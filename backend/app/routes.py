@@ -1,4 +1,4 @@
-from fastapi import APIRouter, UploadFile, File, Depends, HTTPException
+from fastapi import APIRouter, UploadFile, File, Depends, HTTPException, Body
 from app.services.linting import analyze_code
 from app.services.ai_review import ai_code_review
 from app.models import User, CodeReview, Team, Base, TeamCreate
@@ -8,6 +8,7 @@ from sqlalchemy.exc import NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
 from sqlalchemy import insert
+import bcrypt
 
 router = APIRouter()
 
@@ -152,4 +153,21 @@ async def populate_demo_data(db: AsyncSession = Depends(get_db)):
     review3 = CodeReview(user=user3, code="console.log('Hi')", language="javascript", pylint="N/A", bandit="N/A", black="N/A", ai_feedback="Use let/const instead of var.")
     db.add_all([review1, review2, review3])
     await db.commit()
-    return {"status": "Demo data populated"} 
+    return {"status": "Demo data populated"}
+
+@router.post("/manual/register")
+async def manual_register(name: str = Body(...), email: str = Body(...), password: str = Body(...), team_id: int = Body(None), db: AsyncSession = Depends(get_db)):
+    hashed_password = bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
+    user = User(name=name, email=email, hashed_password=hashed_password, team_id=team_id)
+    db.add(user)
+    await db.commit()
+    await db.refresh(user)
+    return {"status": "registered"}
+
+@router.post("/manual/login")
+async def manual_login(email: str = Body(...), password: str = Body(...), db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(User).where(User.email == email))
+    user = result.scalar_one_or_none()
+    if not user or not user.hashed_password or not bcrypt.checkpw(password.encode(), user.hashed_password.encode()):
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+    return {"status": "logged_in", "user_id": user.id, "name": user.name, "email": user.email, "team_id": user.team_id} 
