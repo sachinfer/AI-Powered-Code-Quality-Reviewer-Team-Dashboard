@@ -7,4 +7,8 @@ router = APIRouter()
 async def analyze_code_file(file: UploadFile = File(...)):
     content = await file.read()
     results = analyze_code(content.decode())
-    return {"analysis": results} 
+    return {
+        "pylint": results["pylint"],
+        "bandit": results["bandit"],
+        "black": results["black"],
+    } 
